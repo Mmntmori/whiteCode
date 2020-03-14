@@ -1,0 +1,55 @@
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", href="./css/style.css")
+        title Document
+    body
+        header.header
+            .header__wrap.wrap 
+                h1.header__title Магазин
+        main.shop
+            .shop__wrap.wrap
+                .shop__inner
+                    .controls
+                        p.controls__title Сортировка
+                        .controls__item
+                            span.controls__text По цене:
+                            button.controls__button.controls__button--down.primary-btn 
+                                span ⇅
+                        .controls__item
+                            span.controls__text По названию:
+                            button.controls__button.controls__button--up.primary-btn
+                                span ⇅
+                        .controls__item
+                            span.controls__text По наличию:
+                            button.controls__button.controls__button--up.primary-btn
+                                span ⇅
+                    .catalog
+                        .catalog__page
+                            .catalog__list
+                        .catalog__pagination
+                            button.catalog__arrow.catalog__arrow--left Назад
+                            .catalog__count
+                                button.catalog__digit 1
+                                button.catalog__digit 2
+                                button.catalog__digit 3
+                                button.catalog__digit 4
+                                button.catalog__digit 5
+                                button.catalog__digit 6
+                                button.catalog__digit 7
+                                button.catalog__digit 8
+                            button.catalog__arrow.catalog__arrow--right Далее
+                    .cart
+                        .cart__list
+                            .cart-item
+                                .cart-item__delete
+                                .cart-item__image
+                                    img(src="http://placekitten.com/600/500", alt="")
+                                p.cart-item__title КОТИК МЯГКИЙ
+                                p.cart-item__count x 3
+                        .cart__sum
+                            p ИТОГО:
+                            p 100500
+                        button.cart__btn.primary-btn Оформить заказ
+        script(src='./js/index.js' type="module")
