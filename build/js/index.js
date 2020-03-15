@@ -2,14 +2,112 @@
 
 import data from './data.js';
 document.addEventListener('DOMContentLoaded', function () {
-  const catalog = document.querySelector('.catalog');
+  const sortByNameBtn = document.getElementById('sortByName');
+  const sortByPriceBtn = document.getElementById('sortByPrice');
+  const sortByAvailabilityBtn = document.getElementById('sortByAvailability');
+  const denySortBtn = document.getElementById('denySortBtn');
   let values = data.map(el => el);
-  let shoppingCart = []; // Разбивает входной массив на подмассивы. Возвращается массив массивов.
+  let shoppingCart = [];
+  let sortByNameFlag = true;
+  let sortByPriceFlag = true;
+  let sortByAvailabilityFlag = true; // Разные алгоритмы для разных сортировок    
+
+  function sortArrByPrice(arr) {
+    let newArr = [...arr];
+
+    if (sortByPriceFlag) {
+      newArr.sort(function (a, b) {
+        if (a.price > b.price) {
+          return 1;
+        } else if (a.price < b.price) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByPriceFlag = false;
+    } else {
+      newArr.sort(function (a, b) {
+        if (a.price < b.price) {
+          return 1;
+        } else if (a.price > b.price) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByPriceFlag = true;
+    }
+
+    return newArr;
+  }
+
+  function sortArrByName(arr) {
+    let newArr = [...arr];
+
+    if (sortByNameFlag) {
+      newArr.sort(function (a, b) {
+        if (a.title > b.title) {
+          return 1;
+        } else if (a.title < b.title) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByNameFlag = false;
+    } else {
+      newArr.sort(function (a, b) {
+        if (a.title < b.title) {
+          return 1;
+        } else if (a.title > b.title) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByNameFlag = true;
+    }
+
+    return newArr;
+  }
+
+  function sortArrByAvailability(arr) {
+    let newArr = [...arr];
+
+    if (sortByAvailabilityFlag) {
+      newArr.sort(function (a, b) {
+        if (a.avalable > b.avalable) {
+          return 1;
+        } else if (a.avalable < b.avalable) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByAvailabilityFlag = false;
+    } else {
+      newArr.sort(function (a, b) {
+        if (a.avalable < b.avalable) {
+          return 1;
+        } else if (a.avalable > b.avalable) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+      sortByAvailabilityFlag = true;
+    }
+
+    return newArr;
+  } // Разбивает входной массив на подмассивы. Возвращается массив массивов.
+
 
   const setPages = arr => {
+    let thisArr = [...arr];
     let pagesArr = [];
 
-    for (let i = 0; i < Math.ceil(arr.length / 15); i++) {
+    for (let i = 0; i <= Math.ceil(thisArr.length / 15); i++) {
       let pageListArr = [];
       let count = 0;
 
@@ -17,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
         count = 15 * i + j;
 
         if (arr[count]) {
-          pageListArr.push(arr[count]);
+          pageListArr.push(thisArr[count]);
         } else {
           break;
         }
@@ -74,6 +172,17 @@ document.addEventListener('DOMContentLoaded', function () {
     return itemImageElement;
   };
 
+  const addToCartArr = obj => {
+    let thisGoodObj = { ...obj,
+      count: 1
+    }; //TODO:
+    // Добавить проверку на количество пополняемых в корзину объектов.
+    // Сделать через цикл, тип если айдишники совпадают, то увеличиваем просто в объекте значени count +1
+
+    console.log(thisGoodObj);
+    return [...shoppingCart, thisGoodObj];
+  };
+
   const createDescElement = el => {
     const itemDescElement = document.createElement('div');
     const itemDescTitle = document.createElement('h3');
@@ -86,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
     itemDescTitle.innerText = el.title;
     itemDescText.innerText = el.desc;
     itemDescPrice.innerText = el.price + ' $';
+    itemDescPrice.setAttribute('data-price', el.price);
     itemDescElement.appendChild(itemDescTitle);
     itemDescElement.appendChild(itemDescPrice);
     itemDescElement.appendChild(itemDescText);
@@ -104,6 +214,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (el.avalable) {
       itemActionBtnText.innerText = 'Добавить в корзину';
+      itemActionBtn.addEventListener('click', function () {
+        let goodsObj = {
+          id: this.parentElement.parentElement.getAttribute('id'),
+          price: this.parentElement.parentElement.querySelector('.catalog-item__price').getAttribute('data-price'),
+          image: this.parentElement.parentElement.querySelector('.catalog-item__image').querySelector('img').getAttribute('src'),
+          title: this.parentElement.parentElement.querySelector('.catalog-item__title').innerText
+        };
+        addToCartArr(goodsObj);
+      });
       itemActionElement.appendChild(itemActionBtn);
     } else {
       itemActionBtnText.innerText = 'Нет в наличии';
@@ -141,6 +260,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  const createCartItemElement = arr => {
+    const cartItem = document.createElement('div');
+  };
+
   createCatalogElement(values);
   createPagination(values);
 
@@ -160,4 +283,68 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
     currentPage.classList.add('catalog__page--active');
   }
+
+  sortByNameBtn.addEventListener('click', function () {
+    // document.getElementsByClassName('catalog').item(0). = '';
+    const catalogPage = document.getElementsByClassName('catalog__page');
+    const arr = [...catalogPage];
+    arr.forEach(function (el, i) {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+    createCatalogElement(sortArrByName(values));
+
+    if (active === null) {
+      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+      currentPage.classList.add('catalog__page--active');
+    }
+  });
+  sortByPriceBtn.addEventListener('click', function () {
+    // document.getElementsByClassName('catalog').item(0). = '';
+    const catalogPage = document.getElementsByClassName('catalog__page');
+    const arr = [...catalogPage];
+    arr.forEach(function (el, i) {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+    createCatalogElement(sortArrByPrice(values));
+
+    if (active === null) {
+      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+      currentPage.classList.add('catalog__page--active');
+    }
+  });
+  sortByAvailabilityBtn.addEventListener('click', function () {
+    // document.getElementsByClassName('catalog').item(0). = '';
+    const catalogPage = document.getElementsByClassName('catalog__page');
+    const arr = [...catalogPage];
+    arr.forEach(function (el, i) {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+    createCatalogElement(sortArrByAvailability(values));
+
+    if (active === null) {
+      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+      currentPage.classList.add('catalog__page--active');
+    }
+  });
+  denySortBtn.addEventListener('click', function () {
+    const catalogPage = document.getElementsByClassName('catalog__page');
+    const arr = [...catalogPage];
+    arr.forEach(function (el, i) {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+    createCatalogElement(values);
+
+    if (active === null) {
+      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+      currentPage.classList.add('catalog__page--active');
+    }
+  });
 });

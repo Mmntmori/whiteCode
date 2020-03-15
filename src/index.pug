@@ -15,16 +15,19 @@ html(lang="en")
                         p.controls__title Сортировка
                         .controls__item
                             span.controls__text По цене:
-                            button.controls__button.controls__button--down.primary-btn 
+                            button.controls__button.controls__button--down.primary-btn#sortByPrice 
                                 span ⇅
                         .controls__item
                             span.controls__text По названию:
-                            button.controls__button.controls__button--up.primary-btn
+                            button.controls__button.controls__button--up.primary-btn#sortByName
                                 span ⇅
                         .controls__item
                             span.controls__text По наличию:
-                            button.controls__button.controls__button--up.primary-btn
+                            button.controls__button.controls__button--up.primary-btn#sortByAvailability
                                 span ⇅
+                        .controls__item
+                            button.controls__button.controls__button--up.primary-btn#denySortBtn
+                                span Сбросить сортировку
                     .catalog
                         .catalog__pagination
                             button.catalog__arrow.catalog__arrow--left Назад
