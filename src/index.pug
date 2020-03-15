@@ -26,19 +26,9 @@ html(lang="en")
                             button.controls__button.controls__button--up.primary-btn
                                 span ⇅
                     .catalog
-                        .catalog__page
-                            .catalog__list
                         .catalog__pagination
                             button.catalog__arrow.catalog__arrow--left Назад
                             .catalog__count
-                                button.catalog__digit 1
-                                button.catalog__digit 2
-                                button.catalog__digit 3
-                                button.catalog__digit 4
-                                button.catalog__digit 5
-                                button.catalog__digit 6
-                                button.catalog__digit 7
-                                button.catalog__digit 8
                             button.catalog__arrow.catalog__arrow--right Далее
                     .cart
                         .cart__list
@@ -50,6 +40,6 @@ html(lang="en")
                                 p.cart-item__count x 3
                         .cart__sum
                             p ИТОГО:
-                            p 100500
+                            p.cart__digit 100500
                         button.cart__btn.primary-btn Оформить заказ
         script(src='./js/index.js' type="module")

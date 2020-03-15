@@ -118,10 +118,17 @@ body {
 .catalog {
     flex: 0 1 900px;
     margin-right: 40px;
+
+    &__page {
+        display: none;
+        &--active {
+            display: block;
+        }
+    }
     &__pagination {
         display: flex;
         justify-content: center;
-        margin: 16px 0 0;
+        margin: 0 0 16px 0;
 
     }
 
@@ -150,6 +157,14 @@ body {
         background-color: #B3FFAB;
         width: 32px;
         height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: inherit;
+        &:hover {
+            color: white;
+        }
     }
 
     &__digit + &__digit {
@@ -205,6 +220,7 @@ body {
     display: flex;
     flex-direction: column;
     align-self: start;
+    margin-top: 48px;
 
     &__list {}
 

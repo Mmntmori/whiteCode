@@ -392,10 +392,14 @@ body {
 .catalog {
   flex: 0 1 900px;
   margin-right: 40px; }
+  .catalog__page {
+    display: none; }
+    .catalog__page--active {
+      display: block; }
   .catalog__pagination {
     display: flex;
     justify-content: center;
-    margin: 16px 0 0; }
+    margin: 0 0 16px 0; }
   .catalog__arrow {
     border-radius: 6px;
     border: none;
@@ -413,7 +417,14 @@ body {
     border: none;
     background-color: #B3FFAB;
     width: 32px;
-    height: 32px; }
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit; }
+    .catalog__digit:hover {
+      color: white; }
   .catalog__digit + .catalog__digit {
     margin-left: 8px; }
 
@@ -450,7 +461,8 @@ body {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  align-self: start; }
+  align-self: start;
+  margin-top: 48px; }
   .cart__sum {
     margin-top: auto; }
 
