@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const sortByNameBtn = document.getElementById('sortByName');
     const sortByPriceBtn = document.getElementById('sortByPrice');
     const sortByAvailabilityBtn = document.getElementById('sortByAvailability')
-    const denySortBtn = document.getElementById('denySortBtn')
+    const denySortBtn = document.getElementById('denySortBtn');
+    const listBackBtn = document.getElementById('listBackBtn');
+    const listForwardBtn = document.getElementById('listForwardBtn');
 
     let values = data.map(el => el);
     let shoppingCart = [];
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return 0;
                 }
             })
-            sortByPriceFlag = true; 
+            sortByPriceFlag = true;
         }
 
         return newArr
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return 0;
                 }
             })
-            sortByNameFlag = true; 
+            sortByNameFlag = true;
         }
 
         return newArr
@@ -97,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return 0;
                 }
             })
-            sortByAvailabilityFlag = true; 
+            sortByAvailabilityFlag = true;
         }
 
         return newArr
@@ -107,12 +109,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const setPages = (arr) => {
         let thisArr = [...arr]
         let pagesArr = [];
-        for (let i = 0; i <= Math.ceil(thisArr.length / 15); i++) {
+        for (let i = 0; i < Math.ceil(thisArr.length / 15); i++) {
             let pageListArr = [];
             let count = 0;
-            for (let j = 1; j <= 15; j++) {
+            for (let j = 0; j < 15; j++) {
                 count = ((15 * i) + j);
                 if (arr[count]) {
+
                     pageListArr.push(thisArr[count]);
                 } else {
                     break
@@ -172,14 +175,117 @@ document.addEventListener('DOMContentLoaded', function () {
         return itemImageElement
     }
 
-    const addToCartArr = (obj) => {
-        let thisGoodObj = {...obj, count: 1}
+    const disableListBtn = (arr = values) => {
+        let lastPageNumber = setPages(arr).length.toString();
+        if ($_GET('page') === '1') {
+            listBackBtn.style.visibility = 'hidden';
+            listForwardBtn.style.visibility = 'visible';
+
+        } else if ($_GET('page') === lastPageNumber) {
+            listForwardBtn.style.visibility = 'hidden';
+            listBackBtn.style.visibility = 'visible';
+
+        } else {
+            listForwardBtn.style.visibility = 'visible';
+            listBackBtn.style.visibility = 'visible';
+        }
+    }
+
+    const listForward = () => {
+        let currentPageNumber = parseInt($_GET('page'));
+        let nextPageNumber = currentPageNumber + 1;
+        const alias = '?page=' + nextPageNumber;
+        window.history.pushState(null, null, alias);
+        disableListBtn();
+        showActivePage();
+    }
+
+    const listBack = () => {
+        let currentPageNumber = parseInt($_GET('page'));
+        let nextPageNumber = currentPageNumber - 1;
+        const alias = '?page=' + nextPageNumber;
+        window.history.pushState(null, null, alias);
+        disableListBtn();
+        showActivePage();
+    }
+
+    const createCartItemElement = (obj) => {
+        const cartItemElement = document.createElement('div')
+        const cartItemDeleteElement = document.createElement('div');
+        const cartItemImageElement = document.createElement('div');
+        const cartItemImage = document.createElement('img');
+        const cartItemTitleElement = document.createElement('p');
+        const cartItemCountElement = document.createElement('p');
+
+        cartItemElement.classList.add('cart-item')
+        cartItemDeleteElement.classList.add('cart-item__delete')
+        cartItemImageElement.classList.add('cart-item__image')
+        cartItemImage.setAttribute('src', `${obj.image}`);
+        cartItemImage.setAttribute('alt', `${obj.title}`);
+        cartItemTitleElement.classList.add('cart-item__title');
+        cartItemTitleElement.innerText = obj.title;
+        cartItemCountElement.classList.add('cart-item__count');
+        cartItemCountElement.innerText = 'x ' + obj.count;
+
+        cartItemElement.appendChild(cartItemDeleteElement);
+        cartItemImageElement.appendChild(cartItemImage);
+        cartItemElement.appendChild(cartItemImageElement);
+        cartItemElement.appendChild(cartItemTitleElement);
+        cartItemElement.appendChild(cartItemCountElement);
+
+        return cartItemElement;
+    }
+
+    const createCartListElement = (arr) => {
+        const cartListElement = document.getElementsByClassName('cart__list');
+        if (document.getElementsByClassName('cart__list').item(0).children.length === 0) {
+            arr.forEach((el, i) => {
+                cartListElement.item(0).appendChild(createCartItemElement(el));
+            }) 
+        } else {
+            cartListElement.item(0).innerHTML = '';
+            arr.forEach((el, i) => {
+                cartListElement.item(0).appendChild(createCartItemElement(el));
+            }) 
+
+            // document.getElementsByClassName('cart__list').item(0).children.forEach(function (el, i) {
+                // if (el.parentNode) {
+                    // el.parentNode.removeChild(el);
+                // }
+            // })
+        }
+    }
+
+    const addToCartArr = (obj, arr) => {
+        let thisGoodObj = { ...obj, count: 1 };
+
+        // console.log(arr);
+        
+        
+        
         //TODO:
         // Добавить проверку на количество пополняемых в корзину объектов.
         // Сделать через цикл, тип если айдишники совпадают, то увеличиваем просто в объекте значени count +1
+        if (arr.length !== 0) {
+            let i = 0;
+            while (i < arr.length)  {
 
-        console.log(thisGoodObj);
-        return [...shoppingCart, thisGoodObj]        
+            }
+
+        } else {
+            arr.push(thisGoodObj);
+            // console.log(thisGoodObj.id);
+            
+        }
+
+        // console.log(arr);
+
+        createCartListElement(arr);
+    }
+
+    const totalAmount = (arr) => {
+        // const cartTotalPriceElement = document.getElementsByClassName('cart__digit');
+
     }
 
     const createDescElement = (el) => {
@@ -218,14 +324,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (el.avalable) {
             itemActionBtnText.innerText = 'Добавить в корзину';
-            itemActionBtn.addEventListener('click', function() {
+            itemActionBtn.addEventListener('click', function () {
                 let goodsObj = {
                     id: this.parentElement.parentElement.getAttribute('id'),
                     price: this.parentElement.parentElement.querySelector('.catalog-item__price').getAttribute('data-price'),
-                    image:this.parentElement.parentElement.querySelector('.catalog-item__image').querySelector('img').getAttribute('src'),
-                    title:this.parentElement.parentElement.querySelector('.catalog-item__title').innerText
+                    image: this.parentElement.parentElement.querySelector('.catalog-item__image').querySelector('img').getAttribute('src'),
+                    title: this.parentElement.parentElement.querySelector('.catalog-item__title').innerText
                 }
-                addToCartArr(goodsObj);
+                addToCartArr(goodsObj, shoppingCart);
             })
             itemActionElement.appendChild(itemActionBtn);
 
@@ -240,7 +346,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const createPagination = (arr) => {
         const paginationElement = document.querySelector('.catalog__count');
-        for (let i = 1; i < setPages(arr).length; i++) {
+        const arrPagesLenght = setPages(arr).length;
+        for (let i = 1; i <= arrPagesLenght; i++) {
             const paginationPageElement = document.createElement('a');
             paginationPageElement.classList.add('catalog__digit');
             paginationPageElement.innerText = i;
@@ -256,14 +363,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     previousPage.classList.remove('catalog__page--active');
                 }
                 activePage.classList.add('catalog__page--active');
+                disableListBtn(values);
             });
             paginationElement.appendChild(paginationPageElement);
         }
-    }
-
-    const createCartItemElement = (arr) => {
-        const cartItem = document.createElement('div');
-
     }
 
     createCatalogElement(values)
@@ -276,22 +379,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return p ? p[1] : false;
     }
 
-    const active = document.querySelector('.catalog__page--active');
-    if ($_GET('page') === false) {
-        window.location.href = '?page=1';
-    }
-    if (active === null) {
-        const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
-        currentPage.classList.add('catalog__page--active');
+    const showActivePage = () => {
+        const active = document.querySelector('.catalog__page--active');
+        if ($_GET('page') === false) {
+            window.location.href = '?page=1';
+        }
+        if (active === null) {
+            const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+            currentPage.classList.add('catalog__page--active');
+        } else {
+            active.classList.remove('catalog__page--active')
+            const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
+            currentPage.classList.add('catalog__page--active');
+        }
     }
 
+    showActivePage();
 
-    sortByNameBtn.addEventListener('click', function() {
+    sortByNameBtn.addEventListener('click', function () {
         // document.getElementsByClassName('catalog').item(0). = '';
         const catalogPage = document.getElementsByClassName('catalog__page');
         const arr = [...catalogPage];
-        
-        arr.forEach(function(el, i) {
+
+        arr.forEach(function (el, i) {
             if (el.parentNode) {
                 el.parentNode.removeChild(el);
             }
@@ -303,12 +413,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     })
 
-    sortByPriceBtn.addEventListener('click', function() {
+    sortByPriceBtn.addEventListener('click', function () {
         // document.getElementsByClassName('catalog').item(0). = '';
         const catalogPage = document.getElementsByClassName('catalog__page');
         const arr = [...catalogPage];
-        
-        arr.forEach(function(el, i) {
+
+        arr.forEach(function (el, i) {
             if (el.parentNode) {
                 el.parentNode.removeChild(el);
             }
@@ -320,12 +430,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     })
 
-    sortByAvailabilityBtn.addEventListener('click', function() {
+    sortByAvailabilityBtn.addEventListener('click', function () {
         // document.getElementsByClassName('catalog').item(0). = '';
         const catalogPage = document.getElementsByClassName('catalog__page');
         const arr = [...catalogPage];
-        
-        arr.forEach(function(el, i) {
+
+        arr.forEach(function (el, i) {
             if (el.parentNode) {
                 el.parentNode.removeChild(el);
             }
@@ -337,11 +447,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     })
 
-    denySortBtn.addEventListener('click', function() {
+    denySortBtn.addEventListener('click', function () {
         const catalogPage = document.getElementsByClassName('catalog__page');
         const arr = [...catalogPage];
-        
-        arr.forEach(function(el, i) {
+
+        arr.forEach(function (el, i) {
             if (el.parentNode) {
                 el.parentNode.removeChild(el);
             }
@@ -353,5 +463,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
     })
+
+    listForwardBtn.addEventListener('click', listForward);
+    listBackBtn.addEventListener('click', listBack);
 
 })
