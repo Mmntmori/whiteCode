@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }; // Функция которая создаёт страницу на основе входного массива
 
 
-  const createPageElement = (arr, i) => {
+  const createPageElement = (arr, i, initArr) => {
     const pageElement = document.createElement('div');
     const pageListElement = document.createElement('div');
     pageElement.classList.add('catalog__page'); // if (i === 1) {
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
     pageListElement.classList.add('catalog__list');
     pageElement.setAttribute('data-page-number', `${i}`);
     arr.forEach(function (el, i) {
-      pageListElement.appendChild(createCatalogItem(el));
+      pageListElement.appendChild(createCatalogItem(el, initArr));
     });
     pageElement.appendChild(pageListElement);
     return pageElement;
@@ -150,16 +150,16 @@ document.addEventListener('DOMContentLoaded', function () {
   const createCatalogElement = arr => {
     const catalogElement = document.querySelector('.catalog');
     setPages(arr).forEach(function (el, i) {
-      catalogElement.appendChild(createPageElement(el, i + 1));
+      catalogElement.appendChild(createPageElement(el, i + 1, arr));
     });
   };
 
-  const createCatalogItem = el => {
+  const createCatalogItem = (el, arr) => {
     const itemElement = document.createElement('div');
     itemElement.classList.add('catalog-item');
     itemElement.appendChild(createImageElement(el));
     itemElement.appendChild(createDescElement(el));
-    itemElement.appendChild(createActionElement(el));
+    itemElement.appendChild(createActionElement(el, arr));
     itemElement.setAttribute('id', `${el.id}`);
     return itemElement;
   };
@@ -221,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function () {
     cartItemImage.setAttribute('alt', `${obj.title}`);
     cartItemTitleElement.classList.add('cart-item__title');
     cartItemTitleElement.innerText = obj.title;
-    cartItemCountElement.classList.add('cart-item__count');
-    cartItemCountElement.innerText = 'x ' + obj.count;
+    cartItemCountElement.classList.add('cart-item__count'); // cartItemCountElement.innerText = 'x ' + obj.count;
+
     cartItemElement.appendChild(cartItemDeleteElement);
     cartItemImageElement.appendChild(cartItemImage);
     cartItemElement.appendChild(cartItemImageElement);
@@ -231,43 +231,62 @@ document.addEventListener('DOMContentLoaded', function () {
     return cartItemElement;
   };
 
-  const createCartListElement = arr => {
+  const createCartListElement = (arr, initArr) => {
     const cartListElement = document.getElementsByClassName('cart__list');
+    let tempArr = [];
 
-    if (document.getElementsByClassName('cart__list').item(0).children.length === 0) {
-      arr.forEach((el, i) => {
-        cartListElement.item(0).appendChild(createCartItemElement(el));
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < initArr.length; j++) {
+        if (arr[i] === initArr[j].id) {
+          let thisItem = {
+            id: initArr[j].id,
+            image: initArr[j].image,
+            title: initArr[j].title,
+            count: 1
+          };
+          tempArr.push(thisItem);
+        }
+      }
+    }
+
+    let cartArr = [];
+
+    for (let i = 0; i < tempArr.length; i++) {
+      for (let j = 0; j < tempArr.length; j++) {
+        let thisItem = {
+          id: tempArr[i].id,
+          image: tempArr[i].image,
+          title: tempArr[i].title,
+          count: 1
+        };
+
+        if (tempArr[i].id === tempArr[j].id) {
+          thisItem.count++;
+          tempArr.shift();
+        } else {
+          cartArr.push(thisItem);
+        } // cartArr.push(thisItem);
+
+      }
+    }
+
+    console.log(cartArr);
+
+    if (cartListElement.item(0).children.length === 0) {
+      cartArr.forEach((el, i) => {
+        cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
       });
     } else {
       cartListElement.item(0).innerHTML = '';
-      arr.forEach((el, i) => {
-        cartListElement.item(0).appendChild(createCartItemElement(el));
-      }); // document.getElementsByClassName('cart__list').item(0).children.forEach(function (el, i) {
-      // if (el.parentNode) {
-      // el.parentNode.removeChild(el);
-      // }
-      // })
+      cartArr.forEach((el, i) => {
+        cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
+      });
     }
   };
 
-  const addToCartArr = (obj, arr) => {
-    let thisGoodObj = { ...obj,
-      count: 1
-    }; // console.log(arr);
-    //TODO:
-    // Добавить проверку на количество пополняемых в корзину объектов.
-    // Сделать через цикл, тип если айдишники совпадают, то увеличиваем просто в объекте значени count +1
-
-    if (arr.length !== 0) {
-      let i = 0;
-
-      while (i < arr.length) {}
-    } else {
-      arr.push(thisGoodObj); // console.log(thisGoodObj.id);
-    } // console.log(arr);
-
-
-    createCartListElement(arr);
+  const addToCartArr = (id, arr, initArr) => {
+    arr.push(id);
+    createCartListElement(arr, initArr);
   };
 
   const totalAmount = arr => {// const cartTotalPriceElement = document.getElementsByClassName('cart__digit');
@@ -292,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return itemDescElement;
   };
 
-  const createActionElement = el => {
+  const createActionElement = (el, arr) => {
     const itemActionElement = document.createElement('div');
     const itemActionBtn = document.createElement('button');
     const itemActionBtnText = document.createElement('span');
@@ -305,13 +324,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (el.avalable) {
       itemActionBtnText.innerText = 'Добавить в корзину';
       itemActionBtn.addEventListener('click', function () {
-        let goodsObj = {
-          id: this.parentElement.parentElement.getAttribute('id'),
-          price: this.parentElement.parentElement.querySelector('.catalog-item__price').getAttribute('data-price'),
-          image: this.parentElement.parentElement.querySelector('.catalog-item__image').querySelector('img').getAttribute('src'),
-          title: this.parentElement.parentElement.querySelector('.catalog-item__title').innerText
-        };
-        addToCartArr(goodsObj, shoppingCart);
+        let thisId = this.parentElement.parentElement.getAttribute('id');
+        addToCartArr(thisId, shoppingCart, arr);
       });
       itemActionElement.appendChild(itemActionBtn);
     } else {
@@ -378,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  disableListBtn();
   showActivePage();
   sortByNameBtn.addEventListener('click', function () {
     // document.getElementsByClassName('catalog').item(0). = '';
@@ -389,11 +404,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
     createCatalogElement(sortArrByName(values));
-
-    if (active === null) {
-      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
-      currentPage.classList.add('catalog__page--active');
-    }
+    showActivePage();
   });
   sortByPriceBtn.addEventListener('click', function () {
     // document.getElementsByClassName('catalog').item(0). = '';
@@ -405,11 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
     createCatalogElement(sortArrByPrice(values));
-
-    if (active === null) {
-      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
-      currentPage.classList.add('catalog__page--active');
-    }
+    showActivePage();
   });
   sortByAvailabilityBtn.addEventListener('click', function () {
     // document.getElementsByClassName('catalog').item(0). = '';
@@ -421,11 +428,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
     createCatalogElement(sortArrByAvailability(values));
-
-    if (active === null) {
-      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
-      currentPage.classList.add('catalog__page--active');
-    }
+    showActivePage();
   });
   denySortBtn.addEventListener('click', function () {
     const catalogPage = document.getElementsByClassName('catalog__page');
@@ -436,11 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
     createCatalogElement(values);
-
-    if (active === null) {
-      const currentPage = document.querySelector(`.catalog__page[data-page-number="${$_GET('page')}"]`);
-      currentPage.classList.add('catalog__page--active');
-    }
+    showActivePage();
   });
   listForwardBtn.addEventListener('click', listForward);
   listBackBtn.addEventListener('click', listBack);
