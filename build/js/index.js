@@ -4,15 +4,18 @@ import data from './data.js';
 document.addEventListener('DOMContentLoaded', function () {
   const sortByNameBtn = document.getElementById('sortByName');
   const sortByPriceBtn = document.getElementById('sortByPrice');
-  const sortByAvailabilityBtn = document.getElementById('sortByAvailability');
+  const sortByAvailabilityBtn = document.getElementById('sortByAvalable');
   const denySortBtn = document.getElementById('denySortBtn');
   const listBackBtn = document.getElementById('listBackBtn');
   const listForwardBtn = document.getElementById('listForwardBtn');
   let values = data.map(el => el);
   let shoppingCart = getCartData() === null ? [] : getCartData();
-  let sortByNameFlag = true;
-  let sortByPriceFlag = true;
-  let sortByAvailabilityFlag = true; //чтобы незабивать лишними массивами
+  const sortDirections = {
+    name: true,
+    price: true,
+    avalable: true
+  }; // Флажки в объекте для удобства сортировки
+  //чтобы незабивать лишними массивами
   // localStorage.clear()
   // Получаем данные из LocalStorage
 
@@ -22,99 +25,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   function setCartData(arr) {
-    localStorage.setItem('shoppingCart', JSON.stringify(arr));
-    return false;
-  } // Разные алгоритмы для разных сортировок    
-
-
-  function sortArrByPrice(arr) {
-    let newArr = [...arr];
-
-    if (sortByPriceFlag) {
-      newArr.sort(function (a, b) {
-        if (a.price > b.price) {
-          return 1;
-        } else if (a.price < b.price) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByPriceFlag = false;
-    } else {
-      newArr.sort(function (a, b) {
-        if (a.price < b.price) {
-          return 1;
-        } else if (a.price > b.price) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByPriceFlag = true;
-    }
-
-    return newArr;
+    localStorage.setItem('shoppingCart', JSON.stringify(arr)); //Зачем тут возвращать?
   }
 
-  function sortArrByName(arr) {
-    let newArr = [...arr];
-
-    if (sortByNameFlag) {
-      newArr.sort(function (a, b) {
-        if (a.title > b.title) {
-          return 1;
-        } else if (a.title < b.title) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByNameFlag = false;
-    } else {
-      newArr.sort(function (a, b) {
-        if (a.title < b.title) {
-          return 1;
-        } else if (a.title > b.title) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByNameFlag = true;
-    }
-
-    return newArr;
-  }
-
-  function sortArrByAvailability(arr) {
-    let newArr = [...arr];
-
-    if (sortByAvailabilityFlag) {
-      newArr.sort(function (a, b) {
-        if (a.avalable > b.avalable) {
-          return 1;
-        } else if (a.avalable < b.avalable) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByAvailabilityFlag = false;
-    } else {
-      newArr.sort(function (a, b) {
-        if (a.avalable < b.avalable) {
-          return 1;
-        } else if (a.avalable > b.avalable) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-      sortByAvailabilityFlag = true;
-    }
-
-    return newArr;
+  function sortItems(array, key) {
+    // Переписал твои сортировки. Ты писал индийский код, не надо так =)
+    const sortedArray = array.sort((a, b) => {
+      return a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0;
+    });
+    sortDirections[key] = !sortDirections[key];
+    return sortDirections[key] ? sortedArray.reverse() : sortedArray;
   } // Разбивает входной массив на подмассивы. Возвращается массив массивов.
 
 
@@ -434,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   disableListBtn();
   showActivePage();
-  sortByNameBtn.addEventListener('click', function () {
+  sortByNameBtn.addEventListener('click', function (e) {
     // document.getElementsByClassName('catalog').item(0). = '';
     const catalogPage = document.getElementsByClassName('catalog__page');
     const arr = [...catalogPage];
@@ -443,10 +363,10 @@ document.addEventListener('DOMContentLoaded', function () {
         el.parentNode.removeChild(el);
       }
     });
-    createCatalogElement(sortArrByName(values));
+    createCatalogElement(sortItems(values, 'title'));
     showActivePage();
   });
-  sortByPriceBtn.addEventListener('click', function () {
+  sortByPriceBtn.addEventListener('click', function (e) {
     // document.getElementsByClassName('catalog').item(0). = '';
     const catalogPage = document.getElementsByClassName('catalog__page');
     const arr = [...catalogPage];
@@ -455,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
         el.parentNode.removeChild(el);
       }
     });
-    createCatalogElement(sortArrByPrice(values));
+    createCatalogElement(sortItems(values, 'price'));
     showActivePage();
   });
   sortByAvailabilityBtn.addEventListener('click', function () {
@@ -467,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function () {
         el.parentNode.removeChild(el);
       }
     });
-    createCatalogElement(sortArrByAvailability(values));
+    createCatalogElement(sortItems(values, 'avalable'));
     showActivePage();
   });
   denySortBtn.addEventListener('click', function () {
