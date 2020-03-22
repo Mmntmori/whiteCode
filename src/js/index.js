@@ -11,11 +11,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const listForwardBtn = document.getElementById('listForwardBtn');
 
     let values = data.map(el => el);
-    let shoppingCart = [];
-
+    let shoppingCart = getCartData() === null ? [] : getCartData();
     let sortByNameFlag = true;
     let sortByPriceFlag = true;
     let sortByAvailabilityFlag = true;
+
+    //чтобы незабивать лишними массивами
+
+    localStorage.clear()
+
+    // Получаем данные из LocalStorage
+    function getCartData() {
+        return JSON.parse(localStorage.getItem('shoppingCart'));
+    }
+    // Записываем данные в LocalStorage
+    function setCartData(arr) {
+        localStorage.setItem('shoppingCart', JSON.stringify(arr));
+        return false;
+    }
 
     // Разные алгоритмы для разных сортировок    
     function sortArrByPrice(arr) {
@@ -225,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
         cartItemTitleElement.classList.add('cart-item__title');
         cartItemTitleElement.innerText = obj.title;
         cartItemCountElement.classList.add('cart-item__count');
-        // cartItemCountElement.innerText = 'x ' + obj.count;
+        cartItemCountElement.innerText = 'x ' + obj.count;
 
         cartItemElement.appendChild(cartItemDeleteElement);
         cartItemImageElement.appendChild(cartItemImage);
@@ -238,65 +251,68 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const createCartListElement = (arr, initArr) => {
         const cartListElement = document.getElementsByClassName('cart__list');
-        let tempArr = [];
 
-        for (let i = 0; i < arr.length; i++) {
-            for (let j = 0; j < initArr.length; j++) {
-                if (arr[i] === initArr[j].id ) {
-                    let thisItem = {
-                        id: initArr[j].id,
-                        image: initArr[j].image,
-                        title: initArr[j].title,
-                        count: 1
-                    };
-                    tempArr.push(thisItem)
-                }
-            }
-        }
-        let cartArr = [];
-        
-        for (let i = 0; i < tempArr.length; i++) {
-            for (let j = 0; j < tempArr.length; j++) {
-                let thisItem = {
-                    id: tempArr[i].id,
-                    image: tempArr[i].image,
-                    title: tempArr[i].title,
-                    count: 1                        
-                }
-                if (tempArr[i].id === tempArr[j].id) {
-                    thisItem.count++;
-                    tempArr.shift();
-                } else {
-                    cartArr.push(thisItem);
-                }
-                // cartArr.push(thisItem);
-
-            }
-        }
-    
-        console.log(cartArr);
-    
         if (cartListElement.item(0).children.length === 0) {
-            cartArr.forEach((el, i) => {
+            arr.forEach((el, i) => {
                 cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
             }) 
         } else {
             cartListElement.item(0).innerHTML = '';
-            cartArr.forEach((el, i) => {
+            arr.forEach((el, i) => {
                 cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
             }) 
         }
     }
 
     const addToCartArr = (id, arr, initArr) => {  
-        arr.push(id);
-        createCartListElement(arr, initArr);
+        let thisObj = {};
+        if (arr.includes(thisObj)) {
+            arr[thisObj[id]] += thisObj[id] + 1;
+        } else {
+            thisObj[id] = 1;
+        };
+        console.log(thisObj);
+        
+
+        for (let i = 0; i < arr.length; i++) {
+            
+        }
+        // setCartData(arr);
+
+        let objArr = [];
+        
+        for (let i = 0; i < arr.length; i++) {
+            for (let j = 0; j < initArr.length; j++) {
+                if (arr[i] === initArr[j].id) {
+                    objArr.push(initArr[j]);
+                }
+            }
+        }
+
+        console.log(arr);
+
+        // createCartListElement(removeDuplicates(objArr), initArr);
     }
 
     const totalAmount = (arr) => {
         // const cartTotalPriceElement = document.getElementsByClassName('cart__digit');
 
     }
+    // function removeDuplicates(arr) {
+    //     let newArray = [];
+    //     let uniqueObject = {};
+    //     for (let i in arr) {
+    //         let objId = arr[i]['id'];   
+    //         uniqueObject[objId] = arr[i];
+    //     }
+
+    //     for (let i in uniqueObject) {
+    //         newArray.push(uniqueObject[i]);
+    //     }
+
+    //     return newArray;
+    // }
+
 
     const createDescElement = (el) => {
         const itemDescElement = document.createElement('div')

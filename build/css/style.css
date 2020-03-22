@@ -521,4 +521,5 @@ body {
     padding: 8px;
     flex: 0 0 auto;
     background-color: lightsteelblue;
-    border-radius: 6px; }
+    border-radius: 6px;
+    margin-left: auto; }
