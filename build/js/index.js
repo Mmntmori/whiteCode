@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
   let sortByNameFlag = true;
   let sortByPriceFlag = true;
   let sortByAvailabilityFlag = true; //чтобы незабивать лишними массивами
-
-  localStorage.clear(); // Получаем данные из LocalStorage
+  // localStorage.clear()
+  // Получаем данные из LocalStorage
 
   function getCartData() {
     return JSON.parse(localStorage.getItem('shoppingCart'));
@@ -228,13 +228,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const cartItemTitleElement = document.createElement('p');
     const cartItemCountElement = document.createElement('p');
     cartItemElement.classList.add('cart-item');
+    cartItemElement.setAttribute('id', `${obj.id}`);
+    cartItemElement.setAttribute('data-price', `${obj.price}`);
     cartItemDeleteElement.classList.add('cart-item__delete');
+    cartItemDeleteElement.classList.add('delete-cart-item-btn');
+    cartItemDeleteElement.addEventListener('click', function (e) {
+      let cartItemId = e.target.parentNode.id;
+      removeCartItem(cartItemId, shoppingCart, values);
+      totalAmount();
+    });
     cartItemImageElement.classList.add('cart-item__image');
     cartItemImage.setAttribute('src', `${obj.image}`);
     cartItemImage.setAttribute('alt', `${obj.title}`);
     cartItemTitleElement.classList.add('cart-item__title');
     cartItemTitleElement.innerText = obj.title;
     cartItemCountElement.classList.add('cart-item__count');
+    cartItemCountElement.setAttribute('count', `${obj.count}`);
     cartItemCountElement.innerText = 'x ' + obj.count;
     cartItemElement.appendChild(cartItemDeleteElement);
     cartItemImageElement.appendChild(cartItemImage);
@@ -246,61 +255,81 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const createCartListElement = (arr, initArr) => {
     const cartListElement = document.getElementsByClassName('cart__list');
+    let newArr = Object.values(arr);
 
     if (cartListElement.item(0).children.length === 0) {
-      arr.forEach((el, i) => {
+      newArr.forEach((el, i) => {
         cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
       });
     } else {
       cartListElement.item(0).innerHTML = '';
-      arr.forEach((el, i) => {
+      newArr.forEach((el, i) => {
         cartListElement.item(0).appendChild(createCartItemElement(el, initArr));
       });
     }
   };
 
-  const addToCartArr = (id, arr, initArr) => {
-    let thisObj = {};
+  const itemsGenerator = (arr, initArr) => {
+    const items = [];
+    initArr.forEach(element => {
+      arr.forEach(item => {
+        if (item === element.id) {
+          items.push(element);
+        }
+      });
+    });
+    return items;
+  };
 
-    if (arr.includes(thisObj)) {
-      arr[thisObj[id]] += thisObj[id] + 1;
-    } else {
-      thisObj[id] = 1;
+  const countedItemsGenerator = arr => {
+    const countedItems = {};
+    arr.forEach(item => {
+      if (!countedItems[item.id]) {
+        countedItems[item.id] = { ...item,
+          count: 1
+        };
+      } else {
+        countedItems[item.id].count++;
+      }
+    });
+    return countedItems;
+  };
+
+  const addToCartArr = (id, arr, initArr) => {
+    if (id !== '') {
+      if (arr !== null) {
+        arr.push(id);
+      } else {
+        getCartData().push(id);
+      }
     }
 
-    ;
-    console.log(thisObj);
+    setCartData(arr);
+    createCartListElement(countedItemsGenerator(itemsGenerator(arr, initArr)));
+  };
 
-    for (let i = 0; i < arr.length; i++) {} // setCartData(arr);
+  const removeCartItem = (id, arr, initArr) => {
+    if (id !== undefined) {
+      if (arr !== null) {
+        const index = arr.indexOf(id);
 
+        if (index > -1) {
+          arr.splice(index, 1);
+        }
+      } else {
+        const index = getCartData().indexOf(id);
 
-    let objArr = [];
-
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = 0; j < initArr.length; j++) {
-        if (arr[i] === initArr[j].id) {
-          objArr.push(initArr[j]);
+        if (index > -1) {
+          getCartData().splice(index, 1);
         }
       }
     }
 
-    console.log(arr); // createCartListElement(removeDuplicates(objArr), initArr);
+    setCartData(arr);
+    createCartListElement(countedItemsGenerator(itemsGenerator(arr, initArr)));
   };
 
-  const totalAmount = arr => {} // const cartTotalPriceElement = document.getElementsByClassName('cart__digit');
-  // function removeDuplicates(arr) {
-  //     let newArray = [];
-  //     let uniqueObject = {};
-  //     for (let i in arr) {
-  //         let objId = arr[i]['id'];   
-  //         uniqueObject[objId] = arr[i];
-  //     }
-  //     for (let i in uniqueObject) {
-  //         newArray.push(uniqueObject[i]);
-  //     }
-  //     return newArray;
-  // }
-  ;
+  addToCartArr("", shoppingCart, values);
 
   const createDescElement = el => {
     const itemDescElement = document.createElement('div');
@@ -336,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
       itemActionBtn.addEventListener('click', function () {
         let thisId = this.parentElement.parentElement.getAttribute('id');
         addToCartArr(thisId, shoppingCart, arr);
+        totalAmount();
       });
       itemActionElement.appendChild(itemActionBtn);
     } else {
@@ -451,6 +481,23 @@ document.addEventListener('DOMContentLoaded', function () {
     createCatalogElement(values);
     showActivePage();
   });
+
+  const totalAmount = () => {
+    let totalPriceElement = document.getElementsByClassName('cart__digit');
+    let cartItems = document.getElementsByClassName('cart-item');
+    let cartItemsPrices = Array.from(cartItems);
+    let sum = 0;
+
+    for (let i = 0; i < cartItemsPrices.length; i++) {
+      let thisPrice = cartItemsPrices[i].getAttribute('data-price');
+      let thisItemCount = parseInt(cartItemsPrices[i].getElementsByClassName('cart-item__count').item(0).getAttribute('count'));
+      sum += thisPrice * thisItemCount;
+    }
+
+    totalPriceElement.item(0).innerText = sum;
+  };
+
+  totalAmount();
   listForwardBtn.addEventListener('click', listForward);
   listBackBtn.addEventListener('click', listBack);
 });
