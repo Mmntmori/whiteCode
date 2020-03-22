@@ -489,7 +489,7 @@ body {
     width: 24px;
     height: 24px;
     background-color: lightcoral;
-    opacity: 0;
+    opacity: 0.3;
     visibility: hidden;
     transition: opacity .3s;
     cursor: pointer;
